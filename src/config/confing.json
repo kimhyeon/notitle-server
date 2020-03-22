@@ -1,0 +1,10 @@
+{
+  "development": {
+    "username": "root",
+    "password": "db비밀번호",
+    "database": "db이름",
+    "host": "127.0.0.1",
+    "dialect": "mysql",
+    "operatorAliases": false
+  }
+}
