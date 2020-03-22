@@ -8,6 +8,19 @@ const user = require('./src/api/user/index');
 
 const app = express();
 
+// db
+var sequelize = require('./src/models').sequelize;
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log('🔵 Connected to DB successfully.');
+  })
+  .catch(err => {
+    console.error('🔴 Unable to connect to the database:', err);
+  });
+
+sequelize.sync();
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -20,7 +33,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // api s
 app.use('/user', user);
-
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

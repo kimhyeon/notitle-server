@@ -1,4 +1,6 @@
 const nodemailer = require('nodemailer');
+const { v4: uuidv4 } = require('uuid');
+const { user } = require('../../models');
 
 const save = (req, res) => {
   if (req.body === {}) return res.status(400).end();
@@ -32,13 +34,32 @@ const save = (req, res) => {
     try {
       let result = await transporter.sendMail(mailOptions);
       if (result.rejected.length === 0) {
+        let id = uuidv4();
+        console.log(id);
+
+        let newUser = await user.create({
+          id,
+          email,
+          pwd,
+          name
+        });
+
         res.json({ result: 1 });
       } else {
         res.json({ result: -912 });
       }
     } catch (err) {
-      console.log(err);
-      res.json({ result: -1 });
+      console.log(
+        '[err]',
+        err.name,
+        err.name === 'SequelizeUniqueConstraintError'
+      );
+
+      if (err.name === 'SequelizeUniqueConstraintError') {
+        res.status(409).json({ result: -1, info: 'email duplicated.' });
+      } else {
+        res.json({ result: -1123 });
+      }
     }
   })();
 };

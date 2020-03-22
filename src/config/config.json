@@ -1,0 +1,14 @@
+{
+  "development": {
+    "username": "herry",
+    "password": "nexus123",
+    "database": "chatchat",
+    "host": "rasgo.iptime.org",
+    "port": "3306",
+    "dialect": "mysql",
+    "operatorAliases": false,
+    "define": {
+      "timestamps": false
+    }
+  }
+}

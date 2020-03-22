@@ -9,8 +9,7 @@ const config = require(path.join(__dirname, '..', 'config', 'config.json'))[
 const db = {};
 const sequelize = new Sequelize(
   config.database,
-  config,
-  username,
+  config.username,
   config.password,
   config
 );
@@ -19,6 +18,6 @@ const sequelize = new Sequelize(
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-db.User = require('./user')(sequelize, Sequelize);
+db.user = require('./user')(sequelize, Sequelize);
 
 module.exports = db;
