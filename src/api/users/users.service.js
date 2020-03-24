@@ -56,7 +56,14 @@ const saveNewUser = reqBody => {
 
 const selectUserByID = id => {
   return users.findOne({
-    attributes: ['id', 'email', 'name', 'profile', 'profile_back', 'status_message'],
+    attributes: [
+      'id',
+      'email',
+      'name',
+      'profile',
+      'profile_back',
+      'status_message'
+    ],
     where: {
       id: id
     }
@@ -71,4 +78,37 @@ const selectUsersByName = name => {
   });
 };
 
-module.exports = { sendEmail, findDuplicatedUser, saveNewUser, selectUserByID, selectUsersByName };
+const updateUser = (id, body) => {
+  let newData = {},
+    {
+      pwd,
+      name,
+      profile,
+      profile_back,
+      status_message,
+      email_certification_flag
+    } = body;
+
+  pwd && (newData['pwd'] = pwd);
+  name && (newData['name'] = name);
+  profile && (newData['profile'] = profile);
+  profile_back && (newData['profile_back'] = profile_back);
+  status_message && (newData['status_message'] = status_message);
+  email_certification_flag &&
+    (newData['email_certification_flag'] = email_certification_flag);
+
+  return users.update(newData, {
+    where: {
+      id: id
+    }
+  });
+};
+
+module.exports = {
+  sendEmail,
+  findDuplicatedUser,
+  saveNewUser,
+  selectUserByID,
+  selectUsersByName,
+  updateUser
+};

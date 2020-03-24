@@ -9,6 +9,7 @@
     "operatorAliases": false,
     "define": {
       "timestamps": false
-    }
+    },
+    "logging": false
   }
 }

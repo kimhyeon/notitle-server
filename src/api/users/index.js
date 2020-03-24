@@ -5,10 +5,10 @@ const ctrl = require('./users.ctrl');
 router.post('/', ctrl.insert);
 
 // router.get('/', ctrl.select);
+router.get('/', ctrl.selectUsersByName);
 router.get('/:id', ctrl.selectUserByID);
-// router.get('/', ctrl.selectUsersByName);
 
-router.put('/', ctrl.update);
+router.put('/:id', ctrl.update);
 router.delete('/', ctrl.remove);
 
 // router.post('/login', () => {});
