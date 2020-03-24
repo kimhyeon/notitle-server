@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 const { v4: uuidv4 } = require('uuid');
-const { user } = require('../../models');
+const { users } = require('../../models');
 const { Op } = require('sequelize');
 
 const sendEmail = reqBody => {
@@ -33,7 +33,7 @@ const sendEmail = reqBody => {
 };
 
 const findDuplicatedUser = email => {
-  return user.findAll({
+  return users.findAll({
     where: {
       email: email,
       email_certification_flag: 1
@@ -46,7 +46,7 @@ const saveNewUser = reqBody => {
   const id = uuidv4();
 
   // return promise
-  return user.create({
+  return users.create({
     id,
     email,
     pwd,
@@ -54,4 +54,21 @@ const saveNewUser = reqBody => {
   });
 };
 
-module.exports = { sendEmail, findDuplicatedUser, saveNewUser };
+const selectUserByID = id => {
+  return users.findOne({
+    attributes: ['id', 'email', 'name', 'profile', 'profile_back', 'status_message'],
+    where: {
+      id: id
+    }
+  });
+};
+
+const selectUsersByName = name => {
+  return users.findAll({
+    where: {
+      name: name
+    }
+  });
+};
+
+module.exports = { sendEmail, findDuplicatedUser, saveNewUser, selectUserByID, selectUsersByName };
