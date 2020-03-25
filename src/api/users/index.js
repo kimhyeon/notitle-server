@@ -8,8 +8,9 @@ router.post('/', ctrl.insert);
 router.get('/', ctrl.selectUsersByName);
 router.get('/:id', ctrl.selectUserByID);
 
-router.put('/:id', ctrl.update);
-router.delete('/', ctrl.remove);
+router.put(['', '/:id'], ctrl.update);
+
+router.delete(['', '/:id'], ctrl.remove);
 
 // router.post('/login', () => {});
 // router.post('/logout', () => {});

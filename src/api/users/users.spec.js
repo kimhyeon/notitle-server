@@ -1,21 +1,32 @@
 const request = require('supertest');
 const should = require('should');
 const app = require('../../../app');
+const { v4: uuidv4 } = require('uuid');
 const { users } = require('../../models');
 
 let newUserID;
 
 // test suit
-describe('POST /users , 회원가입 ', () => {
+describe.only('POST /users , 회원가입 ', () => {
   let email = 'dudu753951@naver.com',
     name = '김현',
     pwd = '1234@1234',
     age = 30;
 
-  before(() =>
+  // before(() =>
+  //   users.destroy({
+  //     where: {
+  //       email: 'dudu753951@naver.com'
+  //     }
+  //   })
+  // );
+
+  let testID;
+
+  after(() =>
     users.destroy({
       where: {
-        email: 'dudu753951@naver.com'
+        id: testID
       }
     })
   );
@@ -31,13 +42,13 @@ describe('POST /users , 회원가입 ', () => {
         .expect(200)
         .end((err, res) => {
           body = res.body;
-          newUserID = res.body.user.id;
+          testID = res.body.user.id;
           done();
         });
     });
 
-    it('result : 1 반환한다', () => {
-      body.should.have.property('result', 1);
+    it('생성된 user 객체를 반환한다', () => {
+      body.should.have.property('user');
     });
 
     it('생성된 유저의 id, email, name 을 반환한다.', () => {
@@ -51,7 +62,7 @@ describe('POST /users , 회원가입 ', () => {
         { email_certification_flag: 1 },
         {
           where: {
-            id: newUserID
+            id: testID
           }
         }
       )
@@ -77,8 +88,7 @@ describe('POST /users , 회원가입 ', () => {
         })
         .expect(409)
         .end((err, res) => {
-          res.body.should.have.property('result', -1);
-          res.body.should.have.property('info');
+          res.body.should.have.property('message');
           done();
         });
     });
@@ -106,14 +116,7 @@ describe('GET /users/:id , id로 회원조회', () => {
 
     it(`user 객체의 키에는 'id', 'email', 'name', 'profile', 'profile_back', 'status_message' 가 있어야한다.`, () => {
       let user = body.user;
-      user.should.have.properties([
-        'id',
-        'email',
-        'name',
-        'profile',
-        'profile_back',
-        'status_message'
-      ]);
+      user.should.have.properties(['id', 'email', 'name', 'profile', 'profile_back', 'status_message']);
     });
   });
 
@@ -152,14 +155,7 @@ describe('GET /users?name= , name query String 조회', () => {
 
     it(`user 객체의 키에는 'id', 'email', 'name', 'profile', 'profile_back', 'status_message' 가 있어야한다.`, () => {
       let user = body.users[0];
-      user.should.have.properties([
-        'id',
-        'email',
-        'name',
-        'profile',
-        'profile_back',
-        'status_message'
-      ]);
+      user.should.have.properties(['id', 'email', 'name', 'profile', 'profile_back', 'status_message']);
     });
   });
 
@@ -180,7 +176,7 @@ describe('GET /users?name= , name query String 조회', () => {
   });
 });
 
-describe.only('PUT /users/:id , user 대이터 수정', () => {
+describe('PUT /users/:id , user 데이터 수정', () => {
   describe('성공 시', () => {
     let demoID = 'fbce0716-39ef-4d8d-a8cb-155b81bea999',
       body;
@@ -203,19 +199,73 @@ describe.only('PUT /users/:id , user 대이터 수정', () => {
 
     it(`user 객체의 키에는 'id', 'email', 'name', 'profile', 'profile_back', 'status_message' 가 있어야한다.`, () => {
       let user = body.user;
-      user.should.have.properties([
-        'id',
-        'email',
-        'name',
-        'profile',
-        'profile_back',
-        'status_message'
-      ]);
+      user.should.have.properties(['id', 'email', 'name', 'profile', 'profile_back', 'status_message']);
     });
 
     it('리턴 객체에 updateCount 키 값이 존재하고, 숫자 값이다.', () => {
       body.should.have.property('updateCount');
       body.updateCount.should.be.a.Number();
+    });
+  });
+
+  describe('실패 시', () => {
+    it(`':id' param 이 존재하지 않을 경우 400 에러.`, done => {
+      request(app)
+        .put('/users')
+        .expect(400)
+        .end(done);
+    });
+
+    it(`requset body 에 아무 값도 없을 경우 400 에러. `, done => {
+      request(app)
+        .put('/users')
+        .send({})
+        .expect(400)
+        .end(done);
+    });
+
+    it(`'pwd', 'name', 'profile', 'profile_back', 'status_message', 'email_certification_flag' 가 아닌 키가 body 에 있을 경우 400 에러.`, done => {
+      request(app)
+        .put('/users')
+        .send({ foo: 'foofoo' })
+        .expect(400)
+        .end(done);
+    });
+  });
+});
+
+describe('DELETE /users:id , user 삭제', () => {
+  let testID = uuidv4();
+
+  before(() => {
+    return users.create({
+      id: testID,
+      pwd: '1312312 321',
+      email: 'demodemodemo@demo.demo',
+      name: 'demo.name',
+      age: 'demo.pwd'
+    });
+  });
+
+  describe('성공 시', () => {
+    it('리턴 객체에 deleteCount 키 값이 존재하고, 숫자 값이다.', done => {
+      request(app)
+        .delete(`/users/${testID}`)
+        .expect(200)
+        .end((err, res) => {
+          res.body.should.have.property('removeCount');
+          res.body.removeCount.should.be.a.Number();
+          done();
+        });
+    });
+  });
+
+  describe('실패 시', () => {
+    it(`':id' param 이 없는 경우 400 에러`, done => {
+      request(app)
+        .delete('/users')
+        .expect(400)
+        .end(done);
     });
   });
 });

@@ -1,33 +1,29 @@
 const service = require('./users.service');
 
 const insert = (req, res) => {
-  if (req.body === {}) return res.status(400).end();
+  if (req.body === {})
+    return res
+      .status(400)
+      .json({ message: 'request body is null, body Need to datas (email, pwd, name, age)' })
+      .end();
 
-  const {
-    email: req_email,
-    pwd: req_pwd,
-    name: req_name,
-    age: req_age
-  } = req.body;
-  if (!req_email || !req_pwd || !req_name || !req_age)
-    return res.status(400).end();
+  const { email: req_email, pwd: req_pwd, name: req_name, age: req_age } = req.body;
+  if (!req_email || !req_pwd || !req_name || !req_age) return res.status(400).end();
 
   (async () => {
     try {
       let duplicateUsers = await service.findDuplicatedUser(req_email);
       if (duplicateUsers.length > 0) {
-        res
-          .status(409)
-          .json({ result: -1, info: 'user certificated email duplicated.' });
+        res.status(409).json({ message: `this email (${req_email}) already joined.` });
         return;
       }
 
       let newUser = await service.saveNewUser(req.body);
       let { id, email, name } = newUser;
 
-      res.status(200).json({ result: 1, user: { id, email, name } });
+      res.status(200).json({ user: { id, email, name } });
     } catch (err) {
-      res.status(500).json({ result: -1, info: err });
+      res.status(500).json({ info: err });
     }
   })();
 };
@@ -79,7 +75,7 @@ const selectUsersByName = (req, res) => {
 };
 
 const update = (req, res) => {
-  let id = req.params.id,
+  let { id } = req.params,
     body = req.body,
     bodyKeys = Object.keys(body);
 
@@ -90,14 +86,7 @@ const update = (req, res) => {
   if (bodyKeys.length === 0) {
     return res.status(400).json({ info: 'request body is null' });
   } else {
-    let validKeys = [
-      'pwd',
-      'name',
-      'profile',
-      'profile_back',
-      'status_message',
-      'email_certification_flag'
-    ];
+    let validKeys = ['pwd', 'name', 'profile', 'profile_back', 'status_message', 'email_certification_flag'];
 
     let isValid = false;
     validKeys.some(validKey => {
@@ -127,6 +116,23 @@ const update = (req, res) => {
   })();
 };
 
-const remove = (req, res) => {};
+const remove = (req, res) => {
+  let { id } = req.params;
+
+  if (id === undefined) {
+    return res.status(400).json({ info: 'id param is null.' });
+  }
+
+  (async () => {
+    try {
+      let result = await service.removeUser(id);
+      console.log('[result]', id, result);
+      res.status(200).json({ removeCount: result });
+    } catch (err) {
+      console.log('[err]', err);
+      res.status(500).json({ result: -1, info: err });
+    }
+  })();
+};
 
 module.exports = { insert, selectUserByID, selectUsersByName, update, remove };
