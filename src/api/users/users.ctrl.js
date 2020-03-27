@@ -135,4 +135,8 @@ const remove = (req, res) => {
   })();
 };
 
-module.exports = { insert, selectUserByID, selectUsersByName, update, remove };
+const login = (req, res) => {
+  res.status(200).end();
+};
+
+module.exports = { insert, selectUserByID, selectUsersByName, update, remove, login };

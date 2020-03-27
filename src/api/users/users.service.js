@@ -97,6 +97,11 @@ const removeUser = id => {
   });
 };
 
+const login = () => {
+  // need to passport setting file !!!
+  // using passport-local!!!!
+};
+
 module.exports = {
   sendEmail,
   findDuplicatedUser,

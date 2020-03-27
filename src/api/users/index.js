@@ -12,7 +12,7 @@ router.put(['', '/:id'], ctrl.update);
 
 router.delete(['', '/:id'], ctrl.remove);
 
-// router.post('/login', () => {});
+router.post('/login', ctrl.login);
 // router.post('/logout', () => {});
 
 module.exports = router;
