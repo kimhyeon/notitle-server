@@ -4,7 +4,6 @@ const ctrl = require('./users.ctrl');
 
 router.post('/', ctrl.insert);
 
-// router.get('/', ctrl.select);
 router.get('/', ctrl.selectUsersByName);
 router.get('/:id', ctrl.selectUserByID);
 
