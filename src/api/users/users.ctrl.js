@@ -1,4 +1,5 @@
 const service = require('./users.service');
+const passport = require('passport');
 
 const insert = (req, res) => {
   if (Object.keys(req.body).length === 0)
@@ -42,7 +43,7 @@ const insert = (req, res) => {
 const selectUserByID = (req, res) => {
   const { id } = req.params;
 
-  console.log('[params]', req.params);
+  console.log('[params-###]', req.params);
 
   if (id === undefined) {
     return res.status(400).json({ message: 'id param is null.' });
@@ -157,8 +158,62 @@ const remove = (req, res) => {
   })();
 };
 
-const login = (req, res) => {
-  res.status(200).end();
+const login = (req, res, next) => {
+  // let { email, pwd}
+
+  passport.authenticate('local', (err, user, info) => {
+    // console.log('[check]', `err ${err !== null}`, user, info);
+    if (err !== null) {
+      return res.status(500).json({ message: err });
+    }
+    if (!user) {
+      return res.status(401).json({ message: info });
+    } else {
+      req.login(user, err => {
+        let {
+          id,
+          email,
+          name,
+          profile,
+          profile_back,
+          status_message,
+          email_certification_flag
+        } = user;
+        return res.status(200).send({
+          user: {
+            id,
+            email,
+            name,
+            profile,
+            profile_back,
+            status_message,
+            email_certification_flag
+          },
+          authenticate: req.isAuthenticated()
+        });
+      });
+    }
+  })(req, res, next);
 };
 
-module.exports = { insert, selectUserByID, selectUsersByName, update, remove, login };
+const isAuthenticated = (req, res) => {
+  console.log('[@@@]', req.user.dataValues);
+  res.json({ authenticate: req.isAuthenticated() });
+};
+
+const logout = (req, res) => {
+  console.log(`[${new Date()}]`, req.user.dataValues);
+  res.logout();
+  res.status(200).json({ authenticate: req.isAuthenticated() });
+};
+
+module.exports = {
+  insert,
+  selectUserByID,
+  selectUsersByName,
+  update,
+  remove,
+  login,
+  logout,
+  isAuthenticated
+};

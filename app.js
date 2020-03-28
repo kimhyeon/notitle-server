@@ -1,8 +1,12 @@
 const createError = require('http-errors');
 const express = require('express');
+const session = require('express-session');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+
+const passport = require('passport');
+const passportCofing = require('./src/passport/passport');
 
 const users = require('./src/api/users/index');
 
@@ -30,6 +34,17 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+const cors = require('cors');
+app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+
+// passport setting ...
+app.use(
+  session({ secret: 'anything', resave: true, saveUninitialized: false })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+passportCofing(passport);
 
 // api s
 app.use('/users', users);

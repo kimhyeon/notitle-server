@@ -4,6 +4,8 @@ const app = require('../../../app');
 const { v4: uuidv4 } = require('uuid');
 const { users } = require('../../models');
 
+const session = require('supertest-session');
+
 let newUserID;
 
 // test suit
@@ -365,4 +367,117 @@ describe('DELETE /users:id , user 삭제', () => {
         });
     });
   });
+});
+
+describe('POST /users/login', () => {
+  let testSession;
+  before(() => {
+    testSession = session(app);
+  });
+
+  describe('성공 시', () => {
+    it('로그인 성공한 user 리턴', done => {
+      testSession
+        .post('/users/login')
+        .send({
+          email: 'demo',
+          pwd: '1234'
+        })
+        .expect(200)
+        .end((err, res) => {
+          res.status.should.be.equal(200);
+          res.body.should.have.property('user');
+          done();
+        });
+    });
+  });
+
+  after(() => {
+    testSession
+      .get('/users/login')
+      .auth('demo', '1234')
+      .end((err, res) => {
+        console.log('[check session]', res.body);
+      });
+  });
+
+  describe('실패 시', () => {
+    it('email, pwd 를 전달 하지 않은 경우, 401', done => {
+      request(app)
+        .post('/users/login')
+        .expect(401)
+        .end((err, res) => {
+          console.log(res.body);
+          done();
+        });
+    });
+
+    it('email 계정이 틀린 경우, 401', done => {
+      request(app)
+        .post('/users/login')
+        .expect(401)
+        .send({
+          email: 'demo3',
+          pwd: 123
+        })
+        .end((err, res) => {
+          console.log(res.body);
+          done();
+        });
+    });
+
+    it('pwd 가 틀릴경우, 401', done => {
+      request(app)
+        .post('/users/login')
+        .expect(401)
+        .send({
+          email: 'demo',
+          pwd: 12344
+        })
+        .end((err, res) => {
+          console.log(res.body);
+          done();
+        });
+    });
+  });
+});
+
+describe.only('POST /users/logout', () => {
+  let testSession;
+
+  before(done => {
+    testSession = session(app);
+
+    testSession
+      .post('/users/login')
+      .send({
+        email: 'demo',
+        pwd: '1234'
+      })
+      .end((err, res) => {
+        console.log('BEFORE', res.body);
+        done();
+      });
+  });
+
+  describe('성공 시', () => {
+    it('로그아웃 성공 시, ', done => {
+      testSession
+        .post('/users/logout')
+        .expect(200)
+        .end((err, res) => {
+          console.log(res.body);
+          done();
+        });
+    });
+  });
+
+  // after(() => {
+  //   testSession
+  //     .get('/users/login')
+  //     .auth('demo', '1234')
+  //     .end((err, res) => {
+  //       console.log('[check session]', res.body);
+  //     });
+  // });
 });
