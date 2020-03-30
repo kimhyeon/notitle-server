@@ -6,27 +6,18 @@ const insert = (req, res) => {
     return res
       .status(400)
       .json({
-        message:
-          'request body is null, body Need to datas (email, pwd, name, age)'
+        message: 'request body is null, body Need to datas (email, pwd, name, age)'
       })
       .end();
 
-  const {
-    email: req_email,
-    pwd: req_pwd,
-    name: req_name,
-    age: req_age
-  } = req.body;
-  if (!req_email || !req_pwd || !req_name || !req_age)
-    return res.status(400).end();
+  const { email: req_email, pwd: req_pwd, name: req_name, age: req_age } = req.body;
+  if (!req_email || !req_pwd || !req_name || !req_age) return res.status(400).end();
 
   (async () => {
     try {
       let duplicateUsers = await service.findDuplicatedUser(req_email);
       if (duplicateUsers.length > 0) {
-        res
-          .status(409)
-          .json({ message: `this email (${req_email}) already joined.` });
+        res.status(409).json({ message: `this email (${req_email}) already joined.` });
         return;
       }
 
@@ -100,14 +91,7 @@ const update = (req, res) => {
   if (bodyKeys.length === 0) {
     return res.status(400).json({ message: 'request body is null' });
   } else {
-    let validKeys = [
-      'pwd',
-      'name',
-      'profile',
-      'profile_back',
-      'status_message',
-      'email_certification_flag'
-    ];
+    let validKeys = ['pwd', 'name', 'profile', 'profile_back', 'status_message', 'email_certification_flag'];
 
     let isValid = false;
     validKeys.some(validKey => {
@@ -118,9 +102,7 @@ const update = (req, res) => {
     });
 
     if (isValid === false) {
-      return res
-        .status(400)
-        .json({ message: 'request body keys are invalid.' });
+      return res.status(400).json({ message: 'request body keys are invalid.' });
     }
   }
 
@@ -170,15 +152,7 @@ const login = (req, res, next) => {
       return res.status(401).json({ message: info });
     } else {
       req.login(user, err => {
-        let {
-          id,
-          email,
-          name,
-          profile,
-          profile_back,
-          status_message,
-          email_certification_flag
-        } = user;
+        let { id, email, name, profile, profile_back, status_message, email_certification_flag } = user;
         return res.status(200).send({
           user: {
             id,
@@ -197,13 +171,16 @@ const login = (req, res, next) => {
 };
 
 const isAuthenticated = (req, res) => {
-  console.log('[@@@]', req.user.dataValues);
-  res.json({ authenticate: req.isAuthenticated() });
+  let user = req.user ? req.user.dataValues : null;
+
+  console.log('[@@@]', req.user);
+  res.json({ user, authenticate: req.isAuthenticated() });
 };
 
 const logout = (req, res) => {
-  console.log(`[${new Date()}]`, req.user.dataValues);
-  res.logout();
+  let user = req.user ? req.user.dataValues : null;
+  console.log(`[${new Date()}]`, user);
+  req.logout();
   res.status(200).json({ authenticate: req.isAuthenticated() });
 };
 

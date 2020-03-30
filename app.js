@@ -39,9 +39,7 @@ const cors = require('cors');
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 
 // passport setting ...
-app.use(
-  session({ secret: 'anything', resave: true, saveUninitialized: false })
-);
+app.use(session({ secret: 'anything', resave: true, saveUninitialized: false }));
 app.use(passport.initialize());
 app.use(passport.session());
 passportCofing(passport);
